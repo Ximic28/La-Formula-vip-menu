@@ -47,7 +47,7 @@
 
     // Consulta el estado del evento
     const { data: config, error: configError } = await supabase
-      .from('Configuracion')
+      .from('configuracion')
       .select('evento_activo')
       .single();
 
@@ -94,4 +94,5 @@
 
 </body>
 </html>
+
 
