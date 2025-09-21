@@ -3,97 +3,132 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Carta del Bar</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <title>La Fórmula VIP - Menú</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background: #f2f2f2;
-    }
-    h1 {
-      text-align: center;
-      color: #333;
-    }
-    .producto {
-      background: white;
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 12px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    .producto h3 {
       margin: 0;
-      color: #444;
+      font-family: 'Poppins', sans-serif;
+      background: #111;
+      color: #f5f5f5;
+      padding: 1rem;
     }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: #ffcc00;
+      margin: 0;
+    }
+
+    .subtitulo {
+      font-size: 1rem;
+      color: #ccc;
+    }
+
+    .producto {
+      background: #222;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+
+    .producto h3 {
+      margin: 0 0 0.5rem;
+      color: #ffcc00;
+    }
+
     .producto p {
-      margin: 5px 0;
-      color: #666;
+      margin: 0.3rem 0;
+      font-size: 0.95rem;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #888;
+      margin-top: 2rem;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 0.5rem;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .producto {
+        padding: 0.8rem;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Carta del Bar</h1>
-  <div id="menu"></div>
+  <header>
+    <h1>La Fórmula VIP</h1>
+    <p class="subtitulo">Menú digital</p>
+  </header>
 
-<script>
-  const supabaseUrl = 'https://akhiezwnuhcldvdoyeee.supabase.co';
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFraGllendudWhjbGR2ZG95ZWVlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NDQ0ODYsImV4cCI6MjA3NDAyMDQ4Nn0.js0m7Pwunf5IOzOzNVpFF-jWMaT6M1c_ceBms3Bkwbg';
+  <main id="menu">
+    <!-- Aquí se cargan los productos -->
+  </main>
 
-  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+  <footer>
+    <p>Escanea el QR para acceder desde tu móvil 📱</p>
+  </footer>
 
-  async function cargarMenu() {
-    console.log("Conectando a Supabase...");
+  <!-- Tu script de Supabase va aquí -->
+  <script>
+    const supabaseUrl = 'https://akhiezwnuhcldvdoyeee.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFraGllendudWhjbGR2ZG95ZWVlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NDQ0ODYsImV4cCI6MjA3NDAyMDQ4Nn0.js0m7Pwunf5IOzOzNVpFF-jWMaT6M1c_ceBms3Bkwbg';
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-    // Consulta el estado del evento desde la tabla "configuracion"
-    const { data: config, error: configError } = await supabase
-      .from('configuracion')
-      .select('evento_activo')
-      .single();
+    async function cargarMenu() {
+      const { data: config, error: configError } = await supabase
+        .from('configuracion')
+        .select('evento_activo')
+        .single();
 
-    const eventoActivo = config?.evento_activo;
-    console.log("¿Evento activo?", eventoActivo);
+      const eventoActivo = config?.evento_activo;
 
-    // Consulta los productos desde la tabla "Inventario"
-    const { data, error } = await supabase
-      .from('Inventario')
-      .select('DESCRIPCION, CONTENIDO, PRECIO_EVENTO, PRECIO');
+      const { data, error } = await supabase
+        .from('Inventario')
+        .select('DESCRIPCION, CONTENIDO, PRECIO_EVENTO, PRECIO');
 
-    console.log("Resultado de productos:", { data, error });
+      const menu = document.getElementById('menu');
+      menu.innerHTML = '';
 
-    const menu = document.getElementById('menu');
-    menu.innerHTML = '';
+      if (error || configError) {
+        menu.innerHTML = '<p>Error al cargar productos.</p>';
+        return;
+      }
 
-    if (error || configError) {
-      menu.innerHTML = '<p>Error al cargar productos.</p>';
-      console.error("Error:", error || configError);
-      return;
+      if (!data || data.length === 0) {
+        menu.innerHTML = '<p>No hay productos disponibles.</p>';
+        return;
+      }
+
+      data.forEach(p => {
+        const precio = eventoActivo ? p.PRECIO_EVENTO : p.PRECIO;
+        menu.innerHTML += `
+          <div class="producto">
+            <h3>${p.DESCRIPCION}</h3>
+            <p>Contenido: ${p.CONTENIDO || '—'}</p>
+            <p>Precio: $${precio}</p>
+          </div>
+        `;
+      });
     }
 
-    if (!data || data.length === 0) {
-      menu.innerHTML = '<p>No hay productos disponibles.</p>';
-      console.warn("La consulta no devolvió datos.");
-      return;
-    }
-
-    data.forEach(p => {
-      const precio = eventoActivo ? p.PRECIO_EVENTO : p.PRECIO;
-      menu.innerHTML += `
-        <div class="producto">
-          <h3>${p.DESCRIPCION}</h3>
-          <p>Contenido: ${p.CONTENIDO || '—'}</p>
-          <p>Precio: $${precio}</p>
-        </div>
-      `;
-    });
-  }
-
-  cargarMenu();
-</script>
-
-
+    cargarMenu();
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </body>
 </html>
-
-
-
