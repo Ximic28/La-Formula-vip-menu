@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carta del Bar</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f2f2f2;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .producto {
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .producto h3 {
+      margin: 0;
+      color: #444;
+    }
+    .producto p {
+      margin: 5px 0;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h1>Carta del Bar</h1>
+  <div id="menu"></div>
+
+ <script>
+  // Primero definimos la variable supabase
+  const supabaseUrl = 'https://akhiezwnuhcldvdoyeee.supabase.co';
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFraGllendudWhjbGR2ZG95ZWVlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NDQ0ODYsImV4cCI6MjA3NDAyMDQ4Nn0.js0m7Pwunf5IOzOzNVpFF-jWMaT6M1c_ceBms3Bkwbg';
+
+  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+  async function cargarMenu() {
+    console.log("Conectando a Supabase...");
+
+    const { data, error } = await supabase
+      .from('Inventario')
+      .select('DESCRIPCION, CONTENIDO, PRECIO_EVENTO');
+
+    console.log("Resultado de Supabase:", { data, error });
+
+    const menu = document.getElementById('menu');
+    menu.innerHTML = '';
+
+    if (error) {
+      menu.innerHTML = '<p>Error al cargar productos.</p>';
+      console.error("Error:", error);
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      menu.innerHTML = '<p>No hay productos disponibles.</p>';
+      console.warn("La consulta no devolvió datos.");
+      return;
+    }
+
+    data.forEach(p => {
+      menu.innerHTML += `
+        <div class="producto">
+          <h3>${p.DESCRIPCION}</h3>
+          <p>Contenido: ${p.CONTENIDO || '—'}</p>
+          <p>Precio: $${p.PRECIO_EVENTO}</p>
+        </div>
+      `;
+    });
+  }
+
+  cargarMenu();
+</script>
+
+
+</body>
+</html>
