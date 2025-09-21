@@ -36,7 +36,7 @@
   <h1>Carta del Bar</h1>
   <div id="menu"></div>
 
- <script>
+<script>
   const supabaseUrl = 'https://akhiezwnuhcldvdoyeee.supabase.co';
   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFraGllendudWhjbGR2ZG95ZWVlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NDQ0ODYsImV4cCI6MjA3NDAyMDQ4Nn0.js0m7Pwunf5IOzOzNVpFF-jWMaT6M1c_ceBms3Bkwbg';
 
@@ -45,7 +45,7 @@
   async function cargarMenu() {
     console.log("Conectando a Supabase...");
 
-    // Consulta el estado del evento
+    // Consulta el estado del evento desde la tabla "configuracion"
     const { data: config, error: configError } = await supabase
       .from('configuracion')
       .select('evento_activo')
@@ -54,10 +54,10 @@
     const eventoActivo = config?.evento_activo;
     console.log("¿Evento activo?", eventoActivo);
 
-    // Consulta los productos
+    // Consulta los productos desde la tabla "Inventario"
     const { data, error } = await supabase
       .from('Inventario')
-      .select('DESCRIPCION, CONTENIDO, PRECIO_EVENTO, PRECIO_NORMAL');
+      .select('DESCRIPCION, CONTENIDO, PRECIO_EVENTO, PRECIO');
 
     console.log("Resultado de productos:", { data, error });
 
@@ -77,7 +77,7 @@
     }
 
     data.forEach(p => {
-      const precio = eventoActivo ? p.PRECIO_EVENTO : p.PRECIO_NORMAL;
+      const precio = eventoActivo ? p.PRECIO_EVENTO : p.PRECIO;
       menu.innerHTML += `
         <div class="producto">
           <h3>${p.DESCRIPCION}</h3>
@@ -94,5 +94,6 @@
 
 </body>
 </html>
+
 
 
