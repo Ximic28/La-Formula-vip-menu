@@ -37,7 +37,6 @@
   <div id="menu"></div>
 
  <script>
-  // Primero definimos la variable supabase
   const supabaseUrl = 'https://akhiezwnuhcldvdoyeee.supabase.co';
   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFraGllendudWhjbGR2ZG95ZWVlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NDQ0ODYsImV4cCI6MjA3NDAyMDQ4Nn0.js0m7Pwunf5IOzOzNVpFF-jWMaT6M1c_ceBms3Bkwbg';
 
@@ -46,18 +45,28 @@
   async function cargarMenu() {
     console.log("Conectando a Supabase...");
 
+    // Consulta el estado del evento
+    const { data: config, error: configError } = await supabase
+      .from('Configuracion')
+      .select('evento_activo')
+      .single();
+
+    const eventoActivo = config?.evento_activo;
+    console.log("¿Evento activo?", eventoActivo);
+
+    // Consulta los productos
     const { data, error } = await supabase
       .from('Inventario')
-      .select('DESCRIPCION, CONTENIDO, PRECIO_EVENTO');
+      .select('DESCRIPCION, CONTENIDO, PRECIO_EVENTO, PRECIO_NORMAL');
 
-    console.log("Resultado de Supabase:", { data, error });
+    console.log("Resultado de productos:", { data, error });
 
     const menu = document.getElementById('menu');
     menu.innerHTML = '';
 
-    if (error) {
+    if (error || configError) {
       menu.innerHTML = '<p>Error al cargar productos.</p>';
-      console.error("Error:", error);
+      console.error("Error:", error || configError);
       return;
     }
 
@@ -68,11 +77,12 @@
     }
 
     data.forEach(p => {
+      const precio = eventoActivo ? p.PRECIO_EVENTO : p.PRECIO_NORMAL;
       menu.innerHTML += `
         <div class="producto">
           <h3>${p.DESCRIPCION}</h3>
           <p>Contenido: ${p.CONTENIDO || '—'}</p>
-          <p>Precio: $${p.PRECIO_EVENTO}</p>
+          <p>Precio: $${precio}</p>
         </div>
       `;
     });
@@ -84,3 +94,4 @@
 
 </body>
 </html>
+
