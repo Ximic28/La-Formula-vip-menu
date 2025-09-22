@@ -30,11 +30,30 @@
       color: #ccc;
     }
 
+    #menu {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+    }
+
+    .categoria {
+      flex: 1 1 calc(50% - 2rem);
+      min-width: 280px;
+    }
+
+    .categoria h2 {
+      color: #ffcc00;
+      margin-top: 1rem;
+      font-size: 1.2rem;
+      border-bottom: 1px solid #444;
+      padding-bottom: 0.3rem;
+    }
+
     .producto {
       background: #222;
       border-radius: 8px;
       padding: 1rem;
-      margin-bottom: 1rem;
+      margin-top: 0.5rem;
       box-shadow: 0 2px 6px rgba(0,0,0,0.3);
     }
 
@@ -55,17 +74,9 @@
       margin-top: 2rem;
     }
 
-    @media (max-width: 600px) {
-      body {
-        padding: 0.5rem;
-      }
-
-      h1 {
-        font-size: 1.5rem;
-      }
-
-      .producto {
-        padding: 0.8rem;
+    @media (max-width: 700px) {
+      .categoria {
+        flex: 1 1 100%;
       }
     }
   </style>
@@ -84,65 +95,71 @@
     <p>Escanea el QR para acceder desde tu móvil 📱</p>
   </footer>
 
- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-<script>
-  const supabaseUrl = 'https://akhiezwnuhcldvdoyeee.supabase.co';
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFraGllendudWhjbGR2ZG95ZWVlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NDQ0ODYsImV4cCI6MjA3NDAyMDQ4Nn0.js0m7Pwunf5IOzOzNVpFF-jWMaT6M1c_ceBms3Bkwbg';
+  <!-- Primero carga Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
-  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+  <!-- Luego tu script personalizado -->
+  <script>
+    const supabaseUrl = 'https://akhiezwnuhcldvdoyeee.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFraGllendudWhjbGR2ZG95ZWVlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NDQ0ODYsImV4cCI6MjA3NDAyMDQ4Nn0.js0m7Pwunf5IOzOzNVpFF-jWMaT6M1c_ceBms3Bkwbg';
 
-  async function cargarMenu() {
-    const { data: config, error: configError } = await supabase
-      .from('configuracion')
-      .select('evento_activo')
-      .single();
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-    const eventoActivo = config?.evento_activo ?? false;
+    async function cargarMenu() {
+      const { data: config, error: configError } = await supabase
+        .from('configuracion')
+        .select('evento_activo')
+        .single();
 
-    const { data, error } = await supabase
-      .from('Inventario')
-      .select('PRODUCTO, DESCRIPCION, CONTENIDO, PRECIO_EVENTO, PRECIO');
+      const eventoActivo = config?.evento_activo ?? false;
 
-    const menu = document.getElementById('menu');
-    menu.innerHTML = '';
+      const { data, error } = await supabase
+        .from('Inventario')
+        .select('PRODUCTO, DESCRIPCION, CONTENIDO, PRECIO_EVENTO, PRECIO');
 
-    if (error || configError) {
-      menu.innerHTML = '<p>Error al cargar productos.</p>';
-      console.error("Error:", error || configError);
-      return;
-    }
+      const menu = document.getElementById('menu');
+      menu.innerHTML = '';
 
-    if (!data || data.length === 0) {
-      menu.innerHTML = '<p>No hay productos disponibles.</p>';
-      return;
-    }
+      if (error || configError) {
+        menu.innerHTML = '<p>Error al cargar productos.</p>';
+        console.error("Error:", error || configError);
+        return;
+      }
 
-    // Agrupar por PRODUCTO
-    const grupos = {};
-    data.forEach(p => {
-      if (!grupos[p.PRODUCTO]) grupos[p.PRODUCTO] = [];
-      grupos[p.PRODUCTO].push(p);
-    });
+      if (!data || data.length === 0) {
+        menu.innerHTML = '<p>No hay productos disponibles.</p>';
+        return;
+      }
 
-    // Mostrar cada grupo
-    Object.entries(grupos).forEach(([categoria, productos]) => {
-      menu.innerHTML += `<h2 style="color:#ffcc00; margin-top:2rem;">${categoria}</h2>`;
-      productos.forEach(p => {
-        const precio = eventoActivo ? p.PRECIO_EVENTO : p.PRECIO;
-        menu.innerHTML += `
-          <div class="producto">
-            <h3>${p.DESCRIPCION}</h3>
-            <p>Contenido: ${p.CONTENIDO || '—'}</p>
-            <p>Precio: $${precio}</p>
-          </div>
-        `;
+      // Agrupar por PRODUCTO
+      const grupos = {};
+      data.forEach(p => {
+        if (!grupos[p.PRODUCTO]) grupos[p.PRODUCTO] = [];
+        grupos[p.PRODUCTO].push(p);
       });
-    });
-  }
 
-  cargarMenu();
-</script>
+      // Mostrar cada grupo
+      Object.entries(grupos).forEach(([categoria, productos]) => {
+        const grupoHTML = document.createElement('div');
+        grupoHTML.className = 'categoria';
+        grupoHTML.innerHTML = `<h2>${categoria}</h2>`;
 
+        productos.forEach(p => {
+          const precio = eventoActivo ? p.PRECIO_EVENTO : p.PRECIO;
+          grupoHTML.innerHTML += `
+            <div class="producto">
+              <h3>${p.DESCRIPCION}</h3>
+              <p>Contenido: ${p.CONTENIDO || '—'}</p>
+              <p>Precio: $${precio}</p>
+            </div>
+          `;
+        });
+
+        menu.appendChild(grupoHTML);
+      });
+    }
+
+    cargarMenu();
+  </script>
 </body>
 </html>
-
