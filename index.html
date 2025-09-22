@@ -84,10 +84,14 @@
     <p>Escanea el QR para acceder desde tu móvil 📱</p>
   </footer>
 
-  <!-- Tu script de Supabase va aquí -->
+  <!-- Primero carga Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+  <!-- Luego tu script personalizado -->
   <script>
     const supabaseUrl = 'https://akhiezwnuhcldvdoyeee.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFraGllendudWhjbGR2ZG95ZWVlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NDQ0ODYsImV4cCI6MjA3NDAyMDQ4Nn0.js0m7Pwunf5IOzOzNVpFF-jWMaT6M1c_ceBms3Bkwbg';
+
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
     async function cargarMenu() {
@@ -96,7 +100,7 @@
         .select('evento_activo')
         .single();
 
-      const eventoActivo = config?.evento_activo;
+      const eventoActivo = config?.evento_activo ?? false;
 
       const { data, error } = await supabase
         .from('Inventario')
@@ -107,6 +111,7 @@
 
       if (error || configError) {
         menu.innerHTML = '<p>Error al cargar productos.</p>';
+        console.error("Error:", error || configError);
         return;
       }
 
@@ -129,6 +134,5 @@
 
     cargarMenu();
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </body>
 </html>
